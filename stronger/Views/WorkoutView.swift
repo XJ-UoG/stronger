@@ -49,7 +49,6 @@ struct WorkoutView: View {
             exercise1.name = "Push-Ups"
             exercise1.reps = "15"
             exercise1.weight = "0"
-            exercise1.isCompleted = false
             exercise1.sortID = getNextSortID()
             workout.addToExercises(exercise1)
             
@@ -95,7 +94,6 @@ struct WorkoutView: View {
     exercise1.name = "Push-Ups"
     exercise1.reps = "15"
     exercise1.weight = "0"
-    exercise1.isCompleted = false
     exercise1.sortID = 1
     newWorkout.addToExercises(exercise1)
     
