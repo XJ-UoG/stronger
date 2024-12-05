@@ -16,6 +16,7 @@
 		2641E9822D00A6160012C50E /* strongerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2641E9812D00A6160012C50E /* strongerTests.swift */; };
 		2641E98C2D00A6160012C50E /* strongerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2641E98B2D00A6160012C50E /* strongerUITests.swift */; };
 		2641E98E2D00A6160012C50E /* strongerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2641E98D2D00A6160012C50E /* strongerUITestsLaunchTests.swift */; };
+		2641E9A72D01853C0012C50E /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2641E9A62D01853C0012C50E /* WorkoutView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,7 @@
 		2641E9872D00A6160012C50E /* strongerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = strongerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2641E98B2D00A6160012C50E /* strongerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = strongerUITests.swift; sourceTree = "<group>"; };
 		2641E98D2D00A6160012C50E /* strongerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = strongerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		2641E9A62D01853C0012C50E /* WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				2641E96D2D00A6150012C50E /* ContentView.swift */,
+				2641E9A62D01853C0012C50E /* WorkoutView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				2641E9782D00A6160012C50E /* stronger.xcdatamodeld in Sources */,
 				2641E96E2D00A6150012C50E /* ContentView.swift in Sources */,
 				2641E96C2D00A6150012C50E /* strongerApp.swift in Sources */,
+				2641E9A72D01853C0012C50E /* WorkoutView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

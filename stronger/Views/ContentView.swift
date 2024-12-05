@@ -23,7 +23,15 @@ struct ContentView: View {
                     ForEach(groupWorkoutByDay(items), id: \.0) { daysAgo, workouts in
                         Section(header: Text("\(getDaysAgoString(daysAgo))")) {
                             ForEach(workouts) { workout in
-                                ExtractedView(workout: workout)
+                                NavigationLink {
+                                    WorkoutView(workout: workout)
+                                } label: {
+                                    VStack (alignment: .leading) {
+                                        Text(workout.name!)
+                                            .font(.headline)
+                                        Text(workout.timestamp!, formatter: workoutTimeFormatter)
+                                    }
+                                }
                             }
                         }
                     }
@@ -98,7 +106,7 @@ struct ContentView: View {
     }
 }
 
-private let workoutTimeFormatter: DateFormatter = {
+let workoutTimeFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateStyle = .short
     formatter.timeStyle = .none
@@ -107,35 +115,4 @@ private let workoutTimeFormatter: DateFormatter = {
 
 #Preview {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-}
-
-struct ExtractedView: View {
-    let workout: Workout
-    
-    var body: some View {
-        NavigationLink {
-            VStack {
-                Text("Item at \(workout.timestamp!, formatter: workoutTimeFormatter)")
-                    .font(.title)
-                if let exercises = workout.exercises as? Set<Exercise> {
-                    ForEach(Array(exercises), id: \.self) { exercise in
-                        HStack {
-                            Text(exercise.name ?? "Unnamed Exercise")
-                            Text("\(exercise.weight ?? "?") kg")
-                            Text("\(exercise.reps ?? "?") reps")
-                        }
-                    }
-                } else {
-                    Text("No exercises found")
-                }
-            }
-            .padding()
-        } label: {
-            VStack (alignment: .leading) {
-                Text(workout.name!)
-                    .font(.headline)
-                Text(workout.timestamp!, formatter: workoutTimeFormatter)
-            }
-        }
-    }
 }
