@@ -10,20 +10,20 @@ import CoreData
 
 struct HomeView: View {
     @Environment(\.managedObjectContext) private var viewContext
-
+    
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Workout.timestamp, ascending: false)],
         animation: .default)
     private var items: FetchedResults<Workout>
-
+    
     var body: some View {
         TabView {
             NavigationView {
                 List {
-                    ForEach(groupWorkoutByDay(items), id: \.0) { daysAgo, workouts in
+                    ForEach(groupWorkoutByDay(items), id: \.0) { daysAgo, groups in
                         Section(header: Text("\(getDaysAgoString(daysAgo))")) {
-                            ForEach(workouts) { workout in
-                                NavigationLink {                                
+                            ForEach(groups) { workout in
+                                NavigationLink {
                                     WorkoutView(workout: workout)
                                 } label: {
                                     VStack (alignment: .leading) {
@@ -33,9 +33,11 @@ struct HomeView: View {
                                     }
                                 }
                             }
+                            .onDelete(perform: { indexSet in
+                                deleteItems(offsets: indexSet, workout: groups)
+                            })
                         }
                     }
-                    .onDelete(perform: deleteItems)
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -59,25 +61,6 @@ struct HomeView: View {
         }
     }
     
-//    private func addExerciseToWorkout() {
-//        print("Adding exercise to workout...")
-//
-//        withAnimation {
-//            let exercise1 = Exercise(context: viewContext)
-//            exercise1.name = "Push-Ups"
-//            exercise1.reps = "15"
-//            exercise1.weight = "0"
-//            items[0].addToExercises(exercise1)
-//
-//            do {
-//                try viewContext.save()
-//            } catch {
-//                let nsError = error as NSError
-//                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-//            }
-//        }
-//    }
-
     private func addItem() {
         withAnimation {
             let newWorkout = Workout(context: viewContext)
@@ -100,11 +83,11 @@ struct HomeView: View {
             }
         }
     }
-
-    private func deleteItems(offsets: IndexSet) {
+    
+    private func deleteItems(offsets: IndexSet, workout: [Workout]) {
         withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
+            offsets.map { workout[$0] }.forEach(viewContext.delete)
+            
             do {
                 try viewContext.save()
             } catch {
