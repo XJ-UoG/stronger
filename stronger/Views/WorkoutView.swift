@@ -49,6 +49,7 @@ struct WorkoutView: View {
             exercise1.name = "Push-Ups"
             exercise1.reps = "15"
             exercise1.weight = "0"
+            exercise1.isCompleted = false
             exercise1.sortID = getNextSortID()
             workout.addToExercises(exercise1)
             
@@ -94,6 +95,7 @@ struct WorkoutView: View {
     exercise1.name = "Push-Ups"
     exercise1.reps = "15"
     exercise1.weight = "0"
+    exercise1.isCompleted = false
     exercise1.sortID = 1
     newWorkout.addToExercises(exercise1)
     
@@ -106,7 +108,6 @@ struct ExerciseListView: View {
     
     var body: some View {
         HStack {
-            Text(exercise.name ?? "Unnamed Exercise")
             HStack {
                 TextField(
                     "0",
@@ -128,9 +129,10 @@ struct ExerciseListView: View {
                     }
                 }
                 .textFieldStyle(.roundedBorder)
+                .fixedSize()
                 Text("kg")
             }
-            Spacer(minLength: 50)
+            Spacer()
             HStack {
                 TextField(
                     "0",
@@ -152,9 +154,39 @@ struct ExerciseListView: View {
                     }
                 }
                 .textFieldStyle(.roundedBorder)
+                .fixedSize()
                 Text("reps")
             }
+            Spacer()
+            Toggle(isOn: $exercise.isCompleted){}
+                .onChange(of: exercise.isCompleted) {
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        let nsError = error as NSError
+                        fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                    }
+                }
+                .toggleStyle(CheckToggleStyle())
         }
-        .padding()
+        .padding(5)
+    }
+}
+
+struct CheckToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            Label {
+                configuration.label
+            } icon: {
+                Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(configuration.isOn ? Color.accentColor : .secondary)
+                    .accessibility(label: Text(configuration.isOn ? "Checked" : "Unchecked"))
+                    .imageScale(.large)
+            }
+        }
+        .buttonStyle(.plain)
     }
 }

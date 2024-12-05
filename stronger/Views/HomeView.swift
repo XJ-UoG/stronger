@@ -54,7 +54,7 @@ struct HomeView: View {
             }
             Color.red
                 .tabItem{
-                    Label("Map", systemImage: "map")
+                    Label("Social", systemImage: "person.2")
                 }
         }
     }
