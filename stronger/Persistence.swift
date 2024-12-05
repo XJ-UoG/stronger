@@ -27,18 +27,21 @@ struct PersistenceController {
             exercise1.name = "Push-Ups"
             exercise1.reps = "15"
             exercise1.weight = "0"
+            exercise1.sortID = 1
             newWorkout.addToExercises(exercise1)
             
             let exercise2 = Exercise(context: viewContext)
             exercise2.name = "Squats"
             exercise2.reps = "20"
             exercise2.weight = "50"
+            exercise1.sortID = 2
             newWorkout.addToExercises(exercise2)
             
             let exercise3 = Exercise(context: viewContext)
             exercise3.name = "Deadlifts"
             exercise3.reps = "10"
             exercise3.weight = "100"
+            exercise1.sortID = 3
             newWorkout.addToExercises(exercise3)
         }
         
