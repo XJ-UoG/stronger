@@ -8,7 +8,7 @@
 import SwiftUI
 import CoreData
 
-struct ContentView: View {
+struct HomeView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
@@ -23,7 +23,7 @@ struct ContentView: View {
                     ForEach(groupWorkoutByDay(items), id: \.0) { daysAgo, workouts in
                         Section(header: Text("\(getDaysAgoString(daysAgo))")) {
                             ForEach(workouts) { workout in
-                                NavigationLink {
+                                NavigationLink {                                
                                     WorkoutView(workout: workout)
                                 } label: {
                                     VStack (alignment: .leading) {
@@ -50,7 +50,7 @@ struct ContentView: View {
                 Text("Select an item")
             }
             .tabItem {
-                Label("Workout", systemImage: "square.and.pencil")
+                Label("Home", systemImage: "house")
             }
             Color.red
                 .tabItem{
@@ -58,12 +58,37 @@ struct ContentView: View {
                 }
         }
     }
+    
+//    private func addExerciseToWorkout() {
+//        print("Adding exercise to workout...")
+//
+//        withAnimation {
+//            let exercise1 = Exercise(context: viewContext)
+//            exercise1.name = "Push-Ups"
+//            exercise1.reps = "15"
+//            exercise1.weight = "0"
+//            items[0].addToExercises(exercise1)
+//
+//            do {
+//                try viewContext.save()
+//            } catch {
+//                let nsError = error as NSError
+//                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+//            }
+//        }
+//    }
 
     private func addItem() {
         withAnimation {
-//            let newItem = Workout(context: viewContext)
-//            newItem.timestamp = Date()
-
+            let newWorkout = Workout(context: viewContext)
+            newWorkout.timestamp = Date()
+            newWorkout.name = "Workout"
+            let exercise1 = Exercise(context: viewContext)
+            exercise1.name = "Push-Ups"
+            exercise1.reps = "15"
+            exercise1.weight = "0"
+            newWorkout.addToExercises(exercise1)
+            
             do {
                 try viewContext.save()
             } catch {
@@ -114,5 +139,5 @@ let workoutTimeFormatter: DateFormatter = {
 }()
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    HomeView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
