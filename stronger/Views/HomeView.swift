@@ -30,6 +30,8 @@ struct HomeView: View {
                                         Text(workout.name!)
                                             .font(.headline)
                                         Text(workout.timestamp!, formatter: workoutTimeFormatter)
+                                            .font(.footnote)
+                                            .fontWeight(.thin)
                                     }
                                 }
                             }
@@ -39,6 +41,11 @@ struct HomeView: View {
                         }
                     }
                 }
+                .overlay(Group {
+                    if items.isEmpty {
+                        Text("No workout found.")
+                    }
+                })
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         EditButton()

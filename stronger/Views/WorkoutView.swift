@@ -11,6 +11,9 @@ struct WorkoutView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @ObservedObject var workout: Workout
     
+    @State private var isPresentForm = false
+    @State private var selectedExerciseName = ""
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -33,20 +36,23 @@ struct WorkoutView: View {
             .padding()
             .toolbar {
                 ToolbarItem {
-                    Button(action: addExerciseToWorkout) {
+                    Button(action: {isPresentForm = true}) {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
             }
+            .sheet(isPresented: $isPresentForm, content: {
+                ExerciseFormView(isPresentForm: $isPresentForm, addExerciseToWorkout: addExerciseToWorkout)
+            })
         }
     }
     
-    private func addExerciseToWorkout() {
-        print("Adding exercise to workout...")
+    private func addExerciseToWorkout(name: String) {
+        print("Adding \(name) exercise to workout...")
         
         withAnimation {
             let exercise1 = Exercise(context: viewContext)
-            exercise1.name = "Push-Ups"
+            exercise1.name = name
             exercise1.reps = "15"
             exercise1.weight = "0"
             exercise1.sortID = getNextSortID()
