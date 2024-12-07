@@ -18,30 +18,56 @@ struct WorkoutView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Text("\(workout.name!) at \(workout.timestamp!, formatter: workoutTimeFormatter)")
+                Text("\(workout.name!)")
                     .font(.title)
+                Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
+                    .font(.subheadline)
+                    .fontWeight(.light)
                 if let exercises = workout.exercises {
                     List {
                         ForEach(groupExerciseByName(exercises), id: \.0) { groupName, groupExercises in
-                            Section(header: Text("\(groupName)")){
-                                ForEach(groupExercises.sorted { $0.sortID < $1.sortID }) { exercise in
+                            Section(header: HStack {
+                                Text("\(groupName)")
+                                Spacer()
+                                Button(action: {addExerciseToWorkout(name: groupName)}) {
+                                    Image(systemName: "plus")
+                                }
+                            }){
+                                let groupExercises = groupExercises.sorted { $0.sortID < $1.sortID }
+                                ForEach(groupExercises) { exercise in
                                     ExerciseListView(exercise: exercise)
                                 }
+                                .onDelete(perform: { indexSet in
+                                    deleteExercise(offsets: indexSet, exercises: groupExercises)
+                                })
                             }
                         }
+                        Button(action: {
+                            isPresentForm = true
+                        }) {
+                            Text("Add New Exercise")
+                                .foregroundColor(.blue)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                        }
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                                .foregroundColor(.blue)
+                        )
+                        .listRowBackground(Color.clear)
                     }
                 } else {
-                    Text("No exercises found")
+                    Text("Empty Workout")
                 }
             }
-            .padding()
-            .toolbar {
-                ToolbarItem {
-                    Button(action: {isPresentForm = true}) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
+//            .toolbar {
+//                ToolbarItem {
+//                    Button(action: {isPresentForm = true}) {
+//                        Label("Add Item", systemImage: "plus")
+//                    }
+//                }
+//            }
             .sheet(isPresented: $isPresentForm, content: {
                 ExerciseFormView(isPresentForm: $isPresentForm, addExerciseToWorkout: addExerciseToWorkout)
             })
@@ -62,6 +88,21 @@ struct WorkoutView: View {
             do {
                 try viewContext.save()
             } catch {
+                let nsError = error as NSError
+                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            }
+        }
+    }
+    
+    private func deleteExercise(offsets: IndexSet, exercises: [Exercise]) {
+        withAnimation {
+            offsets.map { exercises[$0] }.forEach(viewContext.delete)
+            
+            do {
+                try viewContext.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }

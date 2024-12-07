@@ -10,7 +10,8 @@ import SwiftUI
 struct ExerciseFormView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
-    @State private var exerciseName: String = ""
+    @State private var existingExerciseName: String = ""
+    @State private var newExerciseName: String = ""
     @Binding var isPresentForm:  Bool
 
     var addExerciseToWorkout: (String) -> Void
@@ -24,25 +25,35 @@ struct ExerciseFormView: View {
     var body: some View {
         VStack {
             Form {
-                Section (header: Text("Exercise")) {
-                    Picker("Selected: ", selection: $exerciseName) {
+                Section (header: Text("Existing")) {
+                    Picker("Selected: ", selection: $existingExerciseName) {
+                        let exerciseNames = Array(Set(exercises.compactMap { $0.name }))
                         // Map exercises into set of exercises names
-                        ForEach(Array(Set(exercises.compactMap { $0.name })), id: \.self) { name in
+                        ForEach(exerciseNames, id: \.self) { name in
                             Text(name)
                         }
                     }
                     .onAppear {
                         if let firstName = exercises.first?.name {
-                            exerciseName = firstName
+                            existingExerciseName = firstName
                         }
+                    }
+                    Button(action: {
+                        addExerciseToWorkout(existingExerciseName)
+                        isPresentForm = false
+                    }) {
+                        Label("Add Item", systemImage: "plus")
                     }
                 }
                 
-                Button(action: {
-                    addExerciseToWorkout(exerciseName)
-                    isPresentForm = false
-                }) {
-                    Label("Add Item", systemImage: "plus")
+                Section (header: Text("New")) {
+                    TextField("New Exercise", text: $newExerciseName)
+                    Button(action: {
+                        addExerciseToWorkout(newExerciseName)
+                        isPresentForm = false
+                    }) {
+                        Label("Add Item", systemImage: "plus")
+                    }
                 }
             }
         }

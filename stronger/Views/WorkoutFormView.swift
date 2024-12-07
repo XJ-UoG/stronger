@@ -44,7 +44,7 @@ struct WorkoutFormView: View {
 //                    }
                 }
                 
-                Section (header: Text("Workout Name")) {
+                Section (header: Text("Workout Details")) {
                     TextField(
                         "My New Workout",
                         text: $workoutName
