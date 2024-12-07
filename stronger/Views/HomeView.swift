@@ -16,6 +16,10 @@ struct HomeView: View {
         animation: .default)
     private var items: FetchedResults<Workout>
     
+    // Variables for ExerciseFormView
+    @State private var isPresentForm = false
+    @State private var selectedExerciseName = ""
+    
     var body: some View {
         TabView {
             NavigationView {
@@ -51,7 +55,7 @@ struct HomeView: View {
                         EditButton()
                     }
                     ToolbarItem {
-                        Button(action: addItem) {
+                        Button(action: {isPresentForm = true}) {
                             Label("Add Item", systemImage: "plus")
                         }
                     }
@@ -66,6 +70,9 @@ struct HomeView: View {
                     Label("Social", systemImage: "person.2")
                 }
         }
+        .sheet(isPresented: $isPresentForm, content: {
+            WorkoutFormView(isPresentForm: $isPresentForm, addNewWorkout: addNewWorkout)
+        })
     }
     
     private func addItem() {
@@ -85,6 +92,28 @@ struct HomeView: View {
             } catch {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nsError = error as NSError
+                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            }
+        }
+    }
+    
+    private func addNewWorkout(workoutName: String, workoutDate: Date, exerciseNames: [String]) {
+        withAnimation {
+            let newWorkout = Workout(context: viewContext)
+            newWorkout.timestamp = workoutDate
+            newWorkout.name = workoutName
+            
+            for (index, exerciseName) in exerciseNames.enumerated() {
+                let exercise = Exercise(context: viewContext)
+                exercise.name = exerciseName
+                exercise.sortID = Int16(index)
+                newWorkout.addToExercises(exercise)
+            }
+            
+            do {
+                try viewContext.save()
+            } catch {
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
             }

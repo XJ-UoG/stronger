@@ -11,6 +11,7 @@ struct WorkoutView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @ObservedObject var workout: Workout
     
+    // Variables for ExerciseFormView
     @State private var isPresentForm = false
     @State private var selectedExerciseName = ""
     
