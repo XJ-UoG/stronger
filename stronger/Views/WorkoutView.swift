@@ -15,14 +15,41 @@ struct WorkoutView: View {
     @State private var isPresentForm = false
     @State private var selectedExerciseName = ""
     
+    // Variables for Expanded Workout Details
+    @State private var isExpanded = false
+    
     var body: some View {
         NavigationView {
             VStack {
-                Text("\(workout.name!)")
-                    .font(.title)
-                Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
-                    .font(.subheadline)
-                    .fontWeight(.light)
+                ZStack {
+                    if !isExpanded {
+                        VStack {
+                            Text("\(workout.name!)")
+                                .font(.title)
+                            Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
+                                .font(.subheadline)
+                                .fontWeight(.light)
+                        }
+                    } else {
+                        VStack {
+                            Text("\(workout.name!)")
+                                .font(.title)
+                            HStack {
+                                Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
+                                    .font(.subheadline)
+                                .fontWeight(.light)
+                                Text("\(workout.timestamp!, style: .time)")
+                                    .font(.subheadline)
+                                    .fontWeight(.light)
+                            }
+                        }
+                    }
+                }
+                .onTapGesture {
+                    withAnimation (.spring(response: 0.6, dampingFraction: 0.8)){
+                        isExpanded.toggle()
+                    }
+                }
                 if let exercises = workout.exercises {
                     List {
                         ForEach(groupExerciseByName(exercises), id: \.0) { groupName, groupExercises in
@@ -34,7 +61,7 @@ struct WorkoutView: View {
                                 }
                             }){
                                 let groupExercises = groupExercises.sorted { $0.sortID < $1.sortID }
-                                ForEach(groupExercises) { exercise in
+                                ForEach(groupExercises.sorted { $0.sortID < $1.sortID }) { exercise in
                                     ExerciseListView(exercise: exercise)
                                 }
                                 .onDelete(perform: { indexSet in

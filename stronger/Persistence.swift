@@ -14,35 +14,45 @@ struct PersistenceController {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         
-        for i in 0..<5 {
-            let newWorkout = Workout(context: viewContext)
-            newWorkout.timestamp = Date().addingTimeInterval(TimeInterval(-i * 24 * 60 * 60))
-            newWorkout.name = "Workout \(5 - i)"
-            
-            let newWorkout2 = Workout(context: viewContext)
-            newWorkout2.timestamp = Date().addingTimeInterval(TimeInterval(-i * 24 * 60 * 60))
-            newWorkout2.name = "Workout \(5 - i) (1)"
-            
-            let exercise1 = Exercise(context: viewContext)
-            exercise1.name = "Push-Ups"
-            exercise1.reps = "15"
-            exercise1.weight = "0"
-            exercise1.sortID = 1
-            newWorkout.addToExercises(exercise1)
-            
-            let exercise2 = Exercise(context: viewContext)
-            exercise2.name = "Squats"
-            exercise2.reps = "20"
-            exercise2.weight = "50"
-            exercise1.sortID = 2
-            newWorkout.addToExercises(exercise2)
-            
-            let exercise3 = Exercise(context: viewContext)
-            exercise3.name = "Deadlifts"
-            exercise3.reps = "10"
-            exercise3.weight = "100"
-            exercise3.sortID = 3
-            newWorkout.addToExercises(exercise3)
+        for i in 0..<7 {
+            if i % 2 == 0 {
+                let newWorkout = Workout(context: viewContext)
+                newWorkout.timestamp = Date().addingTimeInterval(TimeInterval(-i * 24 * 60 * 60))
+                newWorkout.name = "Upper Workout"
+                
+                let exercise1 = Exercise(context: viewContext)
+                exercise1.name = "Push-Ups"
+                exercise1.reps = "30"
+                exercise1.weight = "0"
+                exercise1.sortID = 1
+                newWorkout.addToExercises(exercise1)
+                
+                let exercise2 = Exercise(context: viewContext)
+                exercise2.name = "Pull-Ups"
+                exercise2.reps = "15"
+                exercise2.weight = "0"
+                exercise2.sortID = 2
+                newWorkout.addToExercises(exercise2)
+                
+            } else {
+                let newWorkout2 = Workout(context: viewContext)
+                newWorkout2.timestamp = Date().addingTimeInterval(TimeInterval(-i * 24 * 60 * 60))
+                newWorkout2.name = "Lower Workout"
+                
+                let exercise3 = Exercise(context: viewContext)
+                exercise3.name = "Squats"
+                exercise3.reps = "20"
+                exercise3.weight = "50"
+                exercise3.sortID = 1
+                newWorkout2.addToExercises(exercise3)
+                
+                let exercise4 = Exercise(context: viewContext)
+                exercise4.name = "Deadlifts"
+                exercise4.reps = "10"
+                exercise4.weight = "100"
+                exercise4.sortID = 2
+                newWorkout2.addToExercises(exercise4)
+            }
         }
         
         do {

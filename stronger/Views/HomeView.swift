@@ -24,7 +24,9 @@ struct HomeView: View {
         TabView {
             NavigationView {
                 List {
-                    ForEach(groupWorkoutByDay(items), id: \.0) { daysAgo, groups in
+                    ForEach(groupWorkoutByDay(items), id: \.0) {
+                        daysAgo,
+                        groups in
                         Section(header: Text("\(getDaysAgoString(daysAgo))")) {
                             ForEach(groups) { workout in
                                 NavigationLink {

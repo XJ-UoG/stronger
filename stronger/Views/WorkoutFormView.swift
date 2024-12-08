@@ -56,7 +56,7 @@ struct WorkoutFormView: View {
                     )
                 }
                 
-                Section (header: Text("Exercises")) {
+                Section (header: Text("Exercises"), footer: Text("+ Fill for more exercises")) {
                     ForEach(exerciseNames.indices, id: \.self) { index in
                         TextField(
                             "Exercise \(index + 1)",
