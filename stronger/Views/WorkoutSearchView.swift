@@ -8,25 +8,29 @@
 import SwiftUI
 
 struct WorkoutSearchView: View {
+    @Environment(\.dismiss) var dismiss
     @Environment(\.managedObjectContext) private var viewContext
     
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Workout.timestamp, ascending: false)],
         animation: .default)
-    private var items: FetchedResults<Workout>
+    private var workouts: FetchedResults<Workout>
+    
+    var onWorkoutSelected: (Workout) -> Void
     
     @State private var searchText: String = ""
     
     var body: some View {
         List {
-            ForEach(groupWorkoutByDay(items), id: \.0) {
+            ForEach(groupWorkoutByDay(workouts), id: \.0) {
                 daysAgo,
                 groups in
                 Section(header: Text("\(getDaysAgoString(daysAgo))")) {
                     ForEach(groups) { workout in
-                        NavigationLink {
-                            WorkoutView(workout: workout)
-                        } label: {
+                        Button(action: {
+                            onWorkoutSelected(workout)
+                            dismiss()
+                        }) {
                             VStack (alignment: .leading) {
                                 Text(workout.name!)
                                     .font(.headline)
@@ -40,7 +44,7 @@ struct WorkoutSearchView: View {
             }
         }
         .navigationTitle("Link Workout")
-        .searchable(text: $searchText, prompt: "Workout Name")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
     }
     
     // Group workouts by the numbers of days ago
@@ -60,5 +64,9 @@ struct WorkoutSearchView: View {
 }
 
 #Preview {
-    WorkoutSearchView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    NavigationView {
+        WorkoutSearchView(onWorkoutSelected: { selectedWorkout in
+            print(selectedWorkout)
+        }).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    }
 }

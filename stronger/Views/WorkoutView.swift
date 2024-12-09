@@ -29,10 +29,15 @@ struct WorkoutView: View {
                     Text("\(workout.name!)")
                         .font(.title)
                     NavigationLink {
-                        WorkoutSearchView()
+                        WorkoutSearchView { selectedWorkout in
+                            self.linkedWorkout = selectedWorkout
+                        }
                     } label: {
                         Image(systemName: "link")
                     }
+                }
+                if let linkedWorkout = linkedWorkout {
+                    Text("\(linkedWorkout.name!)")
                 }
                 if isWorkoutExpanded {
                     HStack {
@@ -100,7 +105,6 @@ struct WorkoutView: View {
                 Text("Empty Workout")
             }
         }
-        .navigationTitle(Text("\(workout.name!)"))
         .sheet(isPresented: $isPresentForm, content: {
             ExerciseFormView(isPresentForm: $isPresentForm, addExerciseToWorkout: addExerciseToWorkout)
         })
@@ -178,7 +182,9 @@ struct WorkoutView: View {
     exercise1.sortID = 1
     newWorkout.addToExercises(exercise1)
     
-    return WorkoutView(workout: newWorkout).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    return NavigationView {
+        WorkoutView(workout: newWorkout).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    }
 }
 
 struct ExerciseListView: View {
