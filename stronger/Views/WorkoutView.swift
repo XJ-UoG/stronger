@@ -16,89 +16,95 @@ struct WorkoutView: View {
     @State private var selectedExerciseName = ""
     
     // Variables for Expanded Workout Details
-    @State private var isExpanded = false
+    @State private var isWorkoutExpanded = false
+    
+    // Variables for Expanded Exercise Details
+    @State private var isExerciseExpanded = false
+    @State private var linkedWorkout: Workout? = nil
     
     var body: some View {
-        NavigationView {
+        VStack {
             VStack {
-                ZStack {
-                    if !isExpanded {
-                        VStack {
-                            Text("\(workout.name!)")
-                                .font(.title)
-                            Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
-                                .font(.subheadline)
-                                .fontWeight(.light)
-                        }
-                    } else {
-                        VStack {
-                            Text("\(workout.name!)")
-                                .font(.title)
-                            HStack {
-                                Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
-                                    .font(.subheadline)
-                                .fontWeight(.light)
-                                Text("\(workout.timestamp!, style: .time)")
-                                    .font(.subheadline)
-                                    .fontWeight(.light)
-                            }
-                        }
+                HStack {
+                    Text("\(workout.name!)")
+                        .font(.title)
+                    NavigationLink {
+                        WorkoutSearchView()
+                    } label: {
+                        Image(systemName: "link")
                     }
                 }
-                .onTapGesture {
+                if isWorkoutExpanded {
+                    HStack {
+                        Text("\(workout.timestamp!, formatter: workoutTimeFormatter)")
+                        Text("\(workout.timestamp!, style: .time)")
+                    }
+                    .font(.subheadline)
+                    .fontWeight(.light)
+                }
+                Button(action: {
                     withAnimation (.spring(response: 0.6, dampingFraction: 0.8)){
-                        isExpanded.toggle()
+                        isWorkoutExpanded.toggle()
                     }
-                }
-                if let exercises = workout.exercises {
-                    List {
-                        ForEach(groupExerciseByName(exercises), id: \.0) { groupName, groupExercises in
-                            Section(header: HStack {
-                                Text("\(groupName)")
-                                Spacer()
+                }, label: {
+                    Image(systemName: isWorkoutExpanded ? "chevron.up" : "chevron.down")
+                        .padding(EdgeInsets(top: 1, leading: 0, bottom: 3, trailing: 0))
+                        .foregroundColor(.blue)
+                })
+            }
+            if let exercises = workout.exercises {
+                List {
+                    ForEach(groupExerciseByName(exercises), id: \.0) { groupName, groupExercises in
+                        Section(header: HStack {
+                            Text("\(groupName)")
+                            Spacer()
+                            Button(action: {isExerciseExpanded = !isExerciseExpanded}) {
+                                Image(systemName: "chevron.down")
+                            }
+                        },  footer: VStack {
+                            if isExerciseExpanded {
+                                Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras in porttitor mi. Duis sit amet laoreet ipsum. Praesent tristique purus aliquam justo eleifend, varius semper libero finibus.")
+                            } else {
                                 Button(action: {addExerciseToWorkout(name: groupName)}) {
                                     Image(systemName: "plus")
+                                        .frame(maxWidth: .infinity)
                                 }
-                            }){
-                                let groupExercises = groupExercises.sorted { $0.sortID < $1.sortID }
-                                ForEach(groupExercises.sorted { $0.sortID < $1.sortID }) { exercise in
-                                    ExerciseListView(exercise: exercise)
-                                }
-                                .onDelete(perform: { indexSet in
-                                    deleteExercise(offsets: indexSet, exercises: groupExercises)
-                                })
                             }
                         }
-                        Button(action: {
-                            isPresentForm = true
-                        }) {
-                            Text("Add New Exercise")
-                                .foregroundColor(.blue)
-                                .padding()
-                                .frame(maxWidth: .infinity)
+                        ){
+                            let groupExercises = groupExercises.sorted { $0.sortID < $1.sortID }
+                            ForEach(groupExercises) { exercise in
+                                ExerciseListView(exercise: exercise)
+                            }
+                            .onDelete(perform: { indexSet in
+                                deleteExercise(offsets: indexSet, exercises: groupExercises)
+                            })
                         }
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
-                                .foregroundColor(.blue)
-                        )
-                        .listRowBackground(Color.clear)
                     }
-                } else {
-                    Text("Empty Workout")
+                    Button(action: {
+                        isPresentForm = true
+                    }) {
+                        Text("Add New Exercise")
+                            .foregroundColor(.blue)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                    }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                            .foregroundColor(.blue)
+                    )
+                    .listRowBackground(Color.clear)
                 }
+            } else {
+                Text("Empty Workout")
             }
-//            .toolbar {
-//                ToolbarItem {
-//                    Button(action: {isPresentForm = true}) {
-//                        Label("Add Item", systemImage: "plus")
-//                    }
-//                }
-//            }
-            .sheet(isPresented: $isPresentForm, content: {
-                ExerciseFormView(isPresentForm: $isPresentForm, addExerciseToWorkout: addExerciseToWorkout)
-            })
         }
+        .navigationTitle(Text("\(workout.name!)"))
+        .sheet(isPresented: $isPresentForm, content: {
+            ExerciseFormView(isPresentForm: $isPresentForm, addExerciseToWorkout: addExerciseToWorkout)
+        })
+        
     }
     
     private func addExerciseToWorkout(name: String) {
@@ -180,69 +186,76 @@ struct ExerciseListView: View {
     @ObservedObject var exercise: Exercise
     
     var body: some View {
-        HStack {
+        VStack {
             HStack {
-                TextField(
-                    "0",
-                    text: Binding(
-                        get: {
-                            exercise.weight ?? "0"
-                        },
-                        set: { newValue in
-                            exercise.weight = newValue
-                        }
+                HStack {
+                    TextField(
+                        "0",
+                        text: Binding(
+                            get: {
+                                exercise.weight ?? "0"
+                            },
+                            set: { newValue in
+                                exercise.weight = newValue
+                            }
+                        )
                     )
-                )
-                .onSubmit {
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        let nsError = error as NSError
-                        fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-                    }
-                }
-                .textFieldStyle(.roundedBorder)
-                .fixedSize()
-                Text("kg")
-            }
-            Spacer()
-            HStack {
-                TextField(
-                    "0",
-                    text: Binding(
-                        get: {
-                            exercise.reps ?? "0"
-                        },
-                        set: { newValue in
-                            exercise.reps = newValue
+                    .onSubmit {
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            let nsError = error as NSError
+                            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
                         }
+                    }
+                    .disabled(exercise.isCompleted)
+                    .textFieldStyle(.roundedBorder)
+                    .fixedSize()
+                    Text("kg")
+                }
+                Spacer()
+                HStack {
+                    TextField(
+                        "0",
+                        text: Binding(
+                            get: {
+                                exercise.reps ?? "0"
+                            },
+                            set: { newValue in
+                                exercise.reps = newValue
+                            }
+                        )
                     )
-                )
-                .onSubmit {
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        let nsError = error as NSError
-                        fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                    .onSubmit {
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            let nsError = error as NSError
+                            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                        }
                     }
+                    .disabled(exercise.isCompleted)
+                    .textFieldStyle(.roundedBorder)
+                    .fixedSize()
+                    Text("reps")
                 }
-                .textFieldStyle(.roundedBorder)
-                .fixedSize()
-                Text("reps")
+                Spacer()
+                Toggle(isOn: $exercise.isCompleted){}
+                    .onChange(of: exercise.isCompleted) {
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            let nsError = error as NSError
+                            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+                        }
+                    }
+                    .toggleStyle(CheckToggleStyle())
             }
-            Spacer()
-            Toggle(isOn: $exercise.isCompleted){}
-                .onChange(of: exercise.isCompleted) {
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        let nsError = error as NSError
-                        fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-                    }
-                }
-                .toggleStyle(CheckToggleStyle())
+            .padding(5)
+            .listRowBackground(exercise.isCompleted ? Color.blue : Color(UIColor.systemBackground))
+            .animation(.easeInOut(duration: 0.2), value: exercise.isCompleted)
+            .foregroundColor(exercise.isCompleted ? .secondary : Color(UIColor.label))
         }
-        .padding(5)
     }
 }
 
@@ -255,8 +268,7 @@ struct CheckToggleStyle: ToggleStyle {
                 configuration.label
             } icon: {
                 Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(configuration.isOn ? Color.accentColor : .secondary)
-                    .accessibility(label: Text(configuration.isOn ? "Checked" : "Unchecked"))
+                    .foregroundStyle(configuration.isOn ? Color.white : .secondary)
                     .imageScale(.large)
             }
         }
