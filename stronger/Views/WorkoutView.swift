@@ -20,7 +20,9 @@ struct WorkoutView: View {
     
     // Variables for Expanded Exercise Details
     @State private var isExerciseExpanded = false
+    
     @State private var linkedWorkout: Workout? = nil
+    @State private var linkedGroupExercises: [(String, [Exercise])] = []
     
     var body: some View {
         VStack {
@@ -31,6 +33,9 @@ struct WorkoutView: View {
                     NavigationLink {
                         WorkoutSearchView { selectedWorkout in
                             self.linkedWorkout = selectedWorkout
+                            if let linkedWorkout = self.linkedWorkout {
+                                self.linkedGroupExercises = groupExerciseByName(linkedWorkout.exercises ?? [])
+                            }
                         }
                     } label: {
                         Image(systemName: "link")
@@ -78,12 +83,29 @@ struct WorkoutView: View {
                         }
                         ){
                             let groupExercises = groupExercises.sorted { $0.sortID < $1.sortID }
-                            ForEach(groupExercises) { exercise in
-                                ExerciseListView(exercise: exercise)
+                            // Linked Exercises List
+                            if self.linkedWorkout != nil && isExerciseExpanded{
+                                if let exercisesForGroup = linkedGroupExercises.first(where: { $0.0 == groupName })?.1 {
+                                    let groupLinkedExercises = exercisesForGroup.sorted { $0.sortID < $1.sortID }
+                                    let combinedExercises = combineExercises(groupExercises, groupLinkedExercises)
+                                    ForEach(combinedExercises, id: \.self.0?.id) { original, linked in
+                                        if let original = original {
+                                            ExerciseListView(exercise: original)
+                                        }
+                                        if let linked = linked {
+                                            LinkedExerciseListView(exercise: linked, original: original)
+                                                .listRowBackground(Color.gray.opacity(0.3))
+                                        }
+                                    }
+                                }
+                            } else {
+                                ForEach(groupExercises) { exercise in
+                                    ExerciseListView(exercise: exercise)
+                                }
+                                .onDelete(perform: { indexSet in
+                                    deleteExercise(offsets: indexSet, exercises: groupExercises)
+                                })
                             }
-                            .onDelete(perform: { indexSet in
-                                deleteExercise(offsets: indexSet, exercises: groupExercises)
-                            })
                         }
                     }
                     Button(action: {
@@ -109,6 +131,19 @@ struct WorkoutView: View {
             ExerciseFormView(isPresentForm: $isPresentForm, addExerciseToWorkout: addExerciseToWorkout)
         })
         
+    }
+    
+    func combineExercises<T1, T2>(_ array1: [T1], _ array2: [T2]) -> [(T1?, T2?)] {
+        let maxCount = max(array1.count, array2.count)
+        var result: [(T1?, T2?)] = []
+        
+        for i in 0..<maxCount {
+            let element1 = i < array1.count ? array1[i] : nil
+            let element2 = i < array2.count ? array2[i] : nil
+            result.append((element1, element2))
+        }
+        
+        return result
     }
     
     private func addExerciseToWorkout(name: String) {
@@ -279,5 +314,40 @@ struct CheckToggleStyle: ToggleStyle {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+struct LinkedExerciseListView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @ObservedObject var exercise: Exercise
+    var original: Exercise?
+    
+    var body: some View {
+        VStack {
+            HStack {
+                HStack {
+                    Text(exercise.weight ?? "0")
+                    .fixedSize()
+                    Text("kg")
+                    if original != nil {
+                        Image(systemName: "arrowtriangle.up.fill")
+                            .foregroundColor(.green)
+                    }
+                }
+                Spacer()
+                HStack {
+                    Text(exercise.reps ?? "0")
+                    .fixedSize()
+                    Text("reps")
+                    if original != nil {
+                        Image(systemName: "arrowtriangle.down.fill")
+                            .foregroundColor(.red)
+                    }
+                }
+                Spacer()
+                Image(systemName: "link")
+            }
+            .padding(5)
+        }
     }
 }
