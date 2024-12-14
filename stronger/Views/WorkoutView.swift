@@ -21,7 +21,7 @@ struct WorkoutView: View {
     // Variables for Expanded Exercise Details
     @State private var isExerciseExpanded = false
     
-    @State private var linkedWorkout: Workout? = nil
+//    @State private var linkedWorkout: Workout? = nil
     @State private var linkedGroupExercises: [(String, [Exercise])] = []
     
     var body: some View {
@@ -32,16 +32,13 @@ struct WorkoutView: View {
                         .font(.title)
                     NavigationLink {
                         WorkoutSearchView { selectedWorkout in
-                            self.linkedWorkout = selectedWorkout
-                            if let linkedWorkout = self.linkedWorkout {
-                                self.linkedGroupExercises = groupExerciseByName(linkedWorkout.exercises ?? [])
-                            }
+                            workout.linked = selectedWorkout
                         }
                     } label: {
                         Image(systemName: "link")
                     }
                 }
-                if let linkedWorkout = linkedWorkout {
+                if let linkedWorkout = workout.linked {
                     Text("\(linkedWorkout.name!)")
                 }
                 if isWorkoutExpanded {
@@ -84,17 +81,19 @@ struct WorkoutView: View {
                         ){
                             let groupExercises = groupExercises.sorted { $0.sortID < $1.sortID }
                             // Linked Exercises List
-                            if self.linkedWorkout != nil && isExerciseExpanded{
+                            if workout.linked != nil{
                                 if let exercisesForGroup = linkedGroupExercises.first(where: { $0.0 == groupName })?.1 {
                                     let groupLinkedExercises = exercisesForGroup.sorted { $0.sortID < $1.sortID }
                                     let combinedExercises = combineExercises(groupExercises, groupLinkedExercises)
                                     ForEach(combinedExercises, id: \.self.0?.id) { original, linked in
                                         if let original = original {
-                                            ExerciseListView(exercise: original)
+                                            ExerciseListView(exercise: original, linked: linked)
                                         }
                                         if let linked = linked {
-                                            LinkedExerciseListView(exercise: linked, original: original)
-                                                .listRowBackground(Color.gray.opacity(0.3))
+                                            if isExerciseExpanded {
+                                                LinkedExerciseListView(exercise: linked)
+                                                    .listRowBackground(Color.gray.opacity(0.3))
+                                            }
                                         }
                                     }
                                 }
@@ -125,6 +124,13 @@ struct WorkoutView: View {
                 }
             } else {
                 Text("Empty Workout")
+            }
+        }
+        .onAppear {
+            if let linkedWorkout = workout.linked {
+                self.linkedGroupExercises = groupExerciseByName(linkedWorkout.exercises ?? [])
+            } else {
+                self.linkedGroupExercises = []
             }
         }
         .sheet(isPresented: $isPresentForm, content: {
@@ -225,6 +231,7 @@ struct WorkoutView: View {
 struct ExerciseListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @ObservedObject var exercise: Exercise
+    var linked: Exercise?
     
     var body: some View {
         VStack {
@@ -281,6 +288,9 @@ struct ExerciseListView: View {
                     Text("reps")
                 }
                 Spacer()
+                if let linked = linked {
+                    compareValues(exercise.reps!, linked.reps!)
+                }
                 Toggle(isOn: $exercise.isCompleted){}
                     .onChange(of: exercise.isCompleted) {
                         do {
@@ -297,6 +307,17 @@ struct ExerciseListView: View {
             .animation(.easeInOut(duration: 0.2), value: exercise.isCompleted)
             .foregroundColor(exercise.isCompleted ? .secondary : Color(UIColor.label))
         }
+    }
+    
+    private func compareValues(_ s1: String, _ s2: String?) -> some View {
+        if let s2 = s2, let v1 = Double(s1), let v2 = Double(s2) {
+            if v1 > v2 {
+                return Image(systemName: "arrowtriangle.up.fill").foregroundColor(.green)
+            } else if v1 < v2 {
+                return Image(systemName: "arrowtriangle.down.fill").foregroundColor(.red)
+            }
+        }
+        return Image(systemName: "minus").foregroundColor(.gray)
     }
 }
 
@@ -318,8 +339,7 @@ struct CheckToggleStyle: ToggleStyle {
 }
 
 struct LinkedExerciseListView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-    @ObservedObject var exercise: Exercise
+    var exercise: Exercise
     var original: Exercise?
     
     var body: some View {
@@ -329,7 +349,6 @@ struct LinkedExerciseListView: View {
                     Text(exercise.weight ?? "0")
                     .fixedSize()
                     Text("kg")
-                    compareValues(link: exercise.weight, original: original?.weight)
                                     
                 }
                 Spacer()
@@ -337,26 +356,11 @@ struct LinkedExerciseListView: View {
                     Text(exercise.reps ?? "0")
                     .fixedSize()
                     Text("reps")
-                    compareValues(link: exercise.reps, original: original?.reps)
                 }
                 Spacer()
                 Image(systemName: "link")
             }
             .padding(5)
         }
-    }
-    
-    private func compareValues(link: String?, original: String?) -> some View {
-        if let linkValue = link, let originalValue = original,
-           let linkDouble = Double(linkValue), let originalDouble = Double(originalValue) {
-            
-            if linkDouble > originalDouble {
-                return Image(systemName: "arrowtriangle.down.fill").foregroundColor(.red)
-            } else if linkDouble < originalDouble {
-                return Image(systemName: "arrowtriangle.up.fill").foregroundColor(.green)
-            }
-        }
-        
-        return Image(systemName: "minus").foregroundColor(.gray)
     }
 }

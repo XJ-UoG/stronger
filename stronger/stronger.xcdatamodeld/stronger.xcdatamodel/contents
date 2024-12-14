@@ -13,5 +13,6 @@
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="exercises" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Exercise" inverseName="workout" inverseEntity="Exercise"/>
+        <relationship name="linked" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Workout"/>
     </entity>
 </model>
