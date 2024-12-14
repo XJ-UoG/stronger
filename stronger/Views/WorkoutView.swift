@@ -329,25 +329,34 @@ struct LinkedExerciseListView: View {
                     Text(exercise.weight ?? "0")
                     .fixedSize()
                     Text("kg")
-                    if original != nil {
-                        Image(systemName: "arrowtriangle.up.fill")
-                            .foregroundColor(.green)
-                    }
+                    compareValues(link: exercise.weight, original: original?.weight)
+                                    
                 }
                 Spacer()
                 HStack {
                     Text(exercise.reps ?? "0")
                     .fixedSize()
                     Text("reps")
-                    if original != nil {
-                        Image(systemName: "arrowtriangle.down.fill")
-                            .foregroundColor(.red)
-                    }
+                    compareValues(link: exercise.reps, original: original?.reps)
                 }
                 Spacer()
                 Image(systemName: "link")
             }
             .padding(5)
         }
+    }
+    
+    private func compareValues(link: String?, original: String?) -> some View {
+        if let linkValue = link, let originalValue = original,
+           let linkDouble = Double(linkValue), let originalDouble = Double(originalValue) {
+            
+            if linkDouble > originalDouble {
+                return Image(systemName: "arrowtriangle.down.fill").foregroundColor(.red)
+            } else if linkDouble < originalDouble {
+                return Image(systemName: "arrowtriangle.up.fill").foregroundColor(.green)
+            }
+        }
+        
+        return Image(systemName: "minus").foregroundColor(.gray)
     }
 }
