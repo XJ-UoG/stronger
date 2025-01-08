@@ -20,12 +20,6 @@ jobs:
           output: stronger_system_design.png
           format: png
 
-      - name: Update README with PNG
-        run: |
-          if ! grep -q 'stronger_system_design.png' README.md; then
-            echo "![System Design Diagram](./stronger_system_design.png)" >> README.md
-          fi
-
       - name: Commit and Push Changes
         run: |
           git config --local user.name "github-actions"
