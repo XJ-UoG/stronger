@@ -1,5 +1,6 @@
 # Stronger
 
-Welcome to the Stronger fitness tracking app.
+### System Design
 
-![System Design Diagram](./stronger_system_design.png)
+![System Design Diagram](stronger_system_diagram.svg)
+
