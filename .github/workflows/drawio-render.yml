@@ -3,7 +3,7 @@ name: Render Drawio to PNG
 on:
   push:
     paths:
-      - "system_design.drawio"  
+      - "stronger_system_design.drawio"
 
 jobs:
   render-drawio:
@@ -16,14 +16,14 @@ jobs:
       - name: .drawio Rendering Action
         uses: tbscompany/render-drawio-action@v1.2.2
         with:
-          input: system_design.drawio
-          output: system_design.png
-          format: png
+          input: stronger_system_design.drawio
+          output: stronger_system_design.png
+          format: png  # Export format: png
 
       - name: Update README with PNG
         run: |
-          if ! grep -q 'system_design.png' README.md; then
-            echo "![System Design](./system_design.png)" >> README.md
+          if ! grep -q 'stronger_system_design.png' README.md; then
+            echo "![System Design Diagram](./stronger_system_design.png)" >> README.md
           fi
 
       - name: Commit and Push Changes
