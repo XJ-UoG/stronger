@@ -3,7 +3,7 @@ name: Render .drawio files
 on:
   push:
     paths:
-      - "stronger_system_diagram.drawio"  # Trigger only when this specific .drawio file is updated
+      - "stronger_system_diagram.drawio" 
 
 jobs:
   render_drawio:
@@ -12,6 +12,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Cache Docker Layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.docker-layer-cache  # Path to cache Docker layers
+        key: ${{ runner.os }}-docker-ghcr-render-drawio-v1
+        restore-keys: |
+          ${{ runner.os }}-docker-
     - name: Render .drawio files
       uses: docker://ghcr.io/racklet/render-drawio-action:v1
       with:
