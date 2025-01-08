@@ -3,7 +3,7 @@ name: Render .drawio files
 on:
   push:
     paths:
-      - "stronger_system_diagram.drawio" 
+      - "stronger_system_diagram.drawio"  # Only run when the stronger_system_diagram.drawio is updated
 
 jobs:
   render_drawio:
@@ -20,6 +20,7 @@ jobs:
         key: ${{ runner.os }}-docker-ghcr-render-drawio-v1
         restore-keys: |
           ${{ runner.os }}-docker-
+          
     - name: Set Up Docker Layer Cache
       run: mkdir -p /tmp/.docker-layer-cache
       
@@ -32,10 +33,16 @@ jobs:
         log-level: 'info'  # Verbose logging
       id: render
       
-    - name: Commit the rendered files
+    - name: Update README with SVG
+      run: |
+        sed -i 's|!\[System Design Diagram\](stronger_system_diagram.svg)|![System Design Diagram](./stronger_system_diagram.svg)|g' README.md
+
+    - name: Commit the rendered files and README
       uses: EndBug/add-and-commit@v7
       with:
         default_author: github_actor  # Use the GitHub actor as commit author
-        message: 'Automatically render stronger_system_diagram.drawio'
-        add: "${{ steps.render.outputs.rendered-files }}"
+        message: 'Automatically render stronger_system_diagram.drawio and update README'
+        add: |
+          stronger_system_diagram.svg
+          README.md
       if: "${{ steps.render.outputs.rendered-files != ''}}"
