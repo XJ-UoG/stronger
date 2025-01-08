@@ -12,20 +12,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Install Draw.io CLI
-        run: npm install -g @jgraph/drawio-cli
-
-      - name: Export PNG from Draw.io Files
+      - name: Download Draw.io Batch CLI
         run: |
-          for file in $(find . -name "*.drawio"); do
-            echo "Exporting $file to PNG"
-            drawio --export --format png "$file" --output "${file%.drawio}.png"
-          done
+          curl -L -o drawio-batch https://github.com/jgraph/drawio-desktop/releases/latest/download/drawio-batch
+          chmod +x drawio-batch
+
+      - name: Export PNG from system-design.drawio
+        run: |
+          ./drawio-batch --export --format png diagrams/system-design.drawio --output diagrams/system-design.png
 
       - name: Commit and Push PNG Files
         run: |
