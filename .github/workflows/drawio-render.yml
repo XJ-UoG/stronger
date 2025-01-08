@@ -1,0 +1,37 @@
+name: Render Drawio to PNG
+
+on:
+  push:
+    paths:
+      - "system_design.drawio"  
+
+jobs:
+  render-drawio:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: .drawio Rendering Action
+        uses: tbscompany/render-drawio-action@v1.2.2
+        with:
+          input: system_design.drawio
+          output: system_design.png
+          format: png
+
+      - name: Update README with PNG
+        run: |
+          if ! grep -q 'system_design.png' README.md; then
+            echo "![System Design](./system_design.png)" >> README.md
+          fi
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "github-actions"
+          git config --local user.email "github-actions@github.com"
+          git add system_design.png README.md
+          git commit -m "Auto-update system_design.png"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
