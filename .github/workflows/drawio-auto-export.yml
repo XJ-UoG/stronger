@@ -12,19 +12,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Download Draw.io Batch CLI
-        run: |
-          curl -L -o drawio-batch https://github.com/jgraph/drawio-desktop/releases/latest/download/drawio-batch
-          chmod +x drawio-batch
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
-      - name: Export PNG from system-design.drawio
+      - name: Install draw.io CLI
         run: |
-          ./drawio-batch --export --format png diagrams/system-design.drawio --output diagrams/system-design.png
-
-      - name: Commit and Push PNG Files
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "actions@github.com"
-          git add .
-          git commit -m "Auto-export PNG from Draw.io diagrams" || echo "No changes to commit"
-          git push
+          npm install -g @jgraph/drawio-desktop
