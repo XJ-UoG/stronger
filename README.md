@@ -2,5 +2,5 @@
 
 ### System Design
 
-![System Design Diagram](stronger_system_diagram.svg)
+![System Design Diagram](./stronger_system_diagram.svg)
 
