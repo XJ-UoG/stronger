@@ -18,7 +18,7 @@ jobs:
         with:
           input: stronger_system_design.drawio
           output: stronger_system_design.png
-          format: png  # Export format: png
+          format: png
 
       - name: Update README with PNG
         run: |
